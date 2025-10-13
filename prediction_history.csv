@@ -1,0 +1,7 @@
+Timestamp,Filename,Prediction,Confidence
+2025-10-13 16:15:47,test_image.jpg,Glass,0.6302
+2025-10-13 16:18:09,test_image.jpg,Glass,0.6302
+2025-10-13 16:18:16,test_image.jpg,Glass,0.6302
+2025-10-13 16:21:16,test_image.jpg,Glass,0.6302
+2025-10-13 16:31:38,laya passport.jpg,Textile Trash,0.4524
+2025-10-13 17:17:50,test_image.jpg,Glass,0.6302
