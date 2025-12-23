@@ -5,3 +5,4 @@ Timestamp,Filename,Prediction,Confidence
 2025-10-13 16:21:16,test_image.jpg,Glass,0.6302
 2025-10-13 16:31:38,laya passport.jpg,Textile Trash,0.4524
 2025-10-13 17:17:50,test_image.jpg,Glass,0.6302
+2025-12-23 22:49:28,Screenshot 2024-08-19 110424.png,Cardboard,0.9928
