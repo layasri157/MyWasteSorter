@@ -1,24 +1,33 @@
+# General stuff to ignore
 .git
 .gitignore
+.vscode/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.env
-.venv
+
+# Local envs
+.venv/
 venv/
-.env/
-*.log
+
+# Caches and notebooks
 .cache/
 .ipynb_checkpoints/
 *.ipynb
 
-# Large assets you don't need in the container
+# Big training artefacts (adjust names for your project)
 data/
 datasets/
 notebooks/
-models_raw/
+checkpoints/
+runs/
+wandb/
+logs/
+
+# Ignore all model files by default
 *.pt
 *.pth
-*.h5
-*.onnx
+
+# BUT keep the one model file you actually use:
+!models/final_waste_model.pth
