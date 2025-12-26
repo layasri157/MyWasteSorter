@@ -8,7 +8,8 @@ import time
 # Load model once
 @st.cache_resource
 def load_model():
-    return load_learner('waste_sorter_model.pkl')
+    # use the Linux‑friendly exported learner
+    return load_learner('waste_sorter_model_export.pkl')
 
 learn = load_model()
 
@@ -48,7 +49,9 @@ if 'upload_key' not in st.session_state:
 def clear_file():
     st.session_state.upload_key += 1
 
-uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"], key=st.session_state.upload_key)
+uploaded_file = st.file_uploader(
+    "Choose an image", type=["jpg", "jpeg", "png"], key=st.session_state.upload_key
+)
 
 if st.button("Clear Image"):
     clear_file()
@@ -56,7 +59,6 @@ if st.button("Clear Image"):
 if uploaded_file is not None:
     with st.spinner('Analyzing image... 🔍'):
         image = PILImage.create(uploaded_file)
-        # Simulate delay for animation effect
         time.sleep(1)
 
     st.image(image, caption="Uploaded Image", use_container_width=True)
@@ -68,7 +70,6 @@ if uploaded_file is not None:
     st.success(f"Prediction: {pred}")
     st.info(f"Confidence: {probs[pred_idx]:.4f}")
 
-    # Category info with nice emoji
     infos = {
         "Plastic": "♻️ Includes plastic bottles, bags, packaging.",
         "Glass": "🔮 Includes bottles and jars.",
