@@ -5,13 +5,15 @@ import os
 import time
 from PIL import Image
 
-from onnx_infer import predict_image  # uses your ONNX predict_image()
+from onnx_infer import predict_image  # ONNX backend
 
 HISTORY_FILE = "prediction_history.csv"
 
-# Load or create history
+# ---------- History helpers ----------
+
 @st.cache_data
-def load_history():
+def load_history(dummy: int = 0):
+    """Load prediction history from CSV."""
     if os.path.exists(HISTORY_FILE):
         try:
             return pd.read_csv(HISTORY_FILE)
@@ -20,7 +22,8 @@ def load_history():
     return pd.DataFrame(columns=["Timestamp", "Filename", "Prediction", "Confidence"])
 
 def append_history(filename: str, pred: str, conf: float):
-    df = load_history()
+    """Append one prediction row and save to CSV."""
+    df = load_history()  # current history
     new_row = {
         "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "Filename": filename,
@@ -29,7 +32,8 @@ def append_history(filename: str, pred: str, conf: float):
     }
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     df.tail(100).to_csv(HISTORY_FILE, index=False)
-    return df
+
+# ---------- UI ----------
 
 # Animated and styled title
 st.markdown("""
@@ -66,6 +70,8 @@ if st.button("Clear Image"):
     clear_file()
     st.rerun()
 
+# ---------- Prediction ----------
+
 if uploaded_file is not None:
     # Analyze image
     with st.spinner("Analyzing image... 🔍"):
@@ -74,7 +80,7 @@ if uploaded_file is not None:
 
     st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    # Predict via ONNX (your predict_image)
+    # Predict via ONNX (predict_image from onnx_infer.py)
     with st.spinner("Predicting waste category... 🎯"):
         pred, pred_idx, probs, conf = predict_image(image)
         time.sleep(1)
@@ -98,7 +104,8 @@ if uploaded_file is not None:
     # Save to history
     append_history(uploaded_file.name, pred, conf)
 
-# Separate section with glowing header
+# ---------- History section ----------
+
 st.markdown("---")
 st.markdown(
     """
@@ -109,6 +116,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Always load fresh history for display
-history_df = load_history()
-st.dataframe(history_df)
+# Force cache refresh every 5 seconds so new rows appear
+history_df = load_history(int(time.time() // 5))
+st.dataframe(history_df, use_container_width=True)
