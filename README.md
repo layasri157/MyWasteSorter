@@ -7,6 +7,9 @@
 
 **Real-time AI-powered waste classification using ONNX Runtime. Deployed to production with Streamlit Cloud. Cross-platform, lightweight, and scalable.**
 
+## 🖼️ Live Demo
+[👉 Try it now!](https://mywastesorter-gkcr8wvpmbhocyildhgrft.streamlit.app/)
+
 ## ✨ Features
 
 - **🔥 ONNX Runtime Inference** - 87MB model, Linux/Windows compatible
@@ -14,9 +17,6 @@
 - **📱 Mobile-Friendly UI** - Drag & drop image upload
 - **☁️ Production Deployed** - Streamlit Cloud (zero server management)
 - **🎯 6 Waste Categories** - plastic, paper, glass, metal, organic, cardboard
-
-## 🖼️ Live Demo
-[👉 Try it now!](https://mywastesorter-gkcr8wvpmbhocyildhgrft.streamlit.app/)
 
 <div align="center">
   <img src="https://github.com/layasri157/MyWasteSorter/raw/main/demo.gif" alt="Demo" width="800"/>
