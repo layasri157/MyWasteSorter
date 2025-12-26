@@ -5,7 +5,7 @@ import os
 import time
 from PIL import Image
 
-import onnx_infer  # uses preprocess_image + predict_onnx from your ONNX file
+from onnx_infer import predict_image  # uses your ONNX predict_image()
 
 # Animated and styled title
 st.markdown("""
@@ -62,14 +62,13 @@ if uploaded_file is not None:
 
     st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    # Predict via ONNX
+    # Predict via ONNX (your predict_image)
     with st.spinner("Predicting waste category... 🎯"):
-        img_array = onnx_infer.preprocess_image(image)
-        pred, conf = onnx_infer.predict_onnx(img_array)  # conf is in percent (0–100)
+        pred, pred_idx, probs, conf = predict_image(image)
         time.sleep(1)
 
     st.success(f"Prediction: {pred}")
-    st.info(f"Confidence: {conf/100:.4f}")
+    st.info(f"Confidence: {conf:.4f}")
 
     # Category info with nice emoji
     infos = {
@@ -84,12 +83,12 @@ if uploaded_file is not None:
     if str(pred) in infos:
         st.info(infos[str(pred)])
 
-    # Save to history
+    # Save to history (same format as before)
     new_row = {
         "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "Filename": uploaded_file.name,
         "Prediction": str(pred),
-        "Confidence": round(float(conf / 100), 4),  # store like old fastai (0–1)
+        "Confidence": round(float(conf), 4),
     }
     history_df = pd.concat([history_df, pd.DataFrame([new_row])], ignore_index=True)
     history_df.to_csv("prediction_history.csv", index=False)
