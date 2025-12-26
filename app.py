@@ -7,6 +7,30 @@ from PIL import Image
 
 from onnx_infer import predict_image  # uses your ONNX predict_image()
 
+HISTORY_FILE = "prediction_history.csv"
+
+# Load or create history
+@st.cache_data
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        try:
+            return pd.read_csv(HISTORY_FILE)
+        except Exception:
+            pass
+    return pd.DataFrame(columns=["Timestamp", "Filename", "Prediction", "Confidence"])
+
+def append_history(filename: str, pred: str, conf: float):
+    df = load_history()
+    new_row = {
+        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Filename": filename,
+        "Prediction": str(pred),
+        "Confidence": round(float(conf), 4),
+    }
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    df.tail(100).to_csv(HISTORY_FILE, index=False)
+    return df
+
 # Animated and styled title
 st.markdown("""
     <h1 style="text-align: center; color: #4CAF50; font-family: 'Courier New', Courier, monospace;">
@@ -26,18 +50,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("Upload a waste image and watch the magic happen ✨")
-
-# Load or create history
-@st.cache_data
-def load_history():
-    if os.path.exists("prediction_history.csv"):
-        try:
-            return pd.read_csv("prediction_history.csv")
-        except Exception:
-            pass
-    return pd.DataFrame(columns=["Timestamp", "Filename", "Prediction", "Confidence"])
-
-history_df = load_history()
 
 # Control uploader with session state for clearing
 if "upload_key" not in st.session_state:
@@ -83,15 +95,8 @@ if uploaded_file is not None:
     if str(pred) in infos:
         st.info(infos[str(pred)])
 
-    # Save to history (same format as before)
-    new_row = {
-        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "Filename": uploaded_file.name,
-        "Prediction": str(pred),
-        "Confidence": round(float(conf), 4),
-    }
-    history_df = pd.concat([history_df, pd.DataFrame([new_row])], ignore_index=True)
-    history_df.to_csv("prediction_history.csv", index=False)
+    # Save to history
+    append_history(uploaded_file.name, pred, conf)
 
 # Separate section with glowing header
 st.markdown("---")
@@ -104,4 +109,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Always load fresh history for display
+history_df = load_history()
 st.dataframe(history_df)
