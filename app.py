@@ -1,17 +1,11 @@
 import streamlit as st
-from fastai.vision.all import *
 import pandas as pd
 from datetime import datetime
 import os
 import time
+from PIL import Image
 
-# Load model once
-@st.cache_resource
-def load_model():
-    # use the Linux‑friendly exported learner
-    return load_learner('waste_sorter_model_export.pkl')
-
-learn = load_model()
+from onnx_infer import predict_image  # new ONNX-based inference
 
 # Animated and styled title
 st.markdown("""
@@ -58,17 +52,17 @@ if st.button("Clear Image"):
 
 if uploaded_file is not None:
     with st.spinner('Analyzing image... 🔍'):
-        image = PILImage.create(uploaded_file)
+        image = Image.open(uploaded_file).convert("RGB")
         time.sleep(1)
 
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
     with st.spinner('Predicting waste category... 🎯'):
-        pred, pred_idx, probs = learn.predict(image)
+        pred, pred_idx, probs, conf = predict_image(image)
         time.sleep(1)
 
     st.success(f"Prediction: {pred}")
-    st.info(f"Confidence: {probs[pred_idx]:.4f}")
+    st.info(f"Confidence: {conf:.4f}")
 
     infos = {
         "Plastic": "♻️ Includes plastic bottles, bags, packaging.",
@@ -85,7 +79,7 @@ if uploaded_file is not None:
         "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "Filename": uploaded_file.name,
         "Prediction": str(pred),
-        "Confidence": round(float(probs[pred_idx]), 4)
+        "Confidence": round(float(conf), 4)
     }
     history_df = pd.concat([history_df, pd.DataFrame([new_row])], ignore_index=True)
     history_df.to_csv('prediction_history.csv', index=False)
