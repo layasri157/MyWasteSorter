@@ -47,18 +47,6 @@ streamlit run app.py
 
 **Overall Accuracy: 94.2%**
 
-## 🔬 Architecture
-
-graph TB
-A[📸 Image Upload] --> B[🖼️ Preprocess
-224x224 + Normalize]
-B --> C[⚙️ ONNX Runtime
-Inference Engine]
-C --> D[🎯 6-Class Prediction
-+ Confidence Scores]
-D --> E[📊 Streamlit UI
-Results Display]
-
 ## 🎯 Why ONNX?
 - ✅ **Cross-Platform** - Windows/Linux/Mac
 - ✅ **Lightweight** - No PyTorch/FastAI (50MB+ saved)
