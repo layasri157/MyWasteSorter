@@ -6,7 +6,7 @@ import time
 from PIL import Image
 import numpy as np
 
-from onnx_infer import predict_image  # ONNX inference
+import onnx_infer  # Correct ONNX import
 
 # Animated and styled title
 st.set_page_config(page_title="MyWasteSorter", layout="wide")
@@ -38,7 +38,6 @@ def load_history():
     if os.path.exists('prediction_history.csv'):
         try:
             df = pd.read_csv('prediction_history.csv')
-            # Ensure correct columns
             if not all(col in df.columns for col in ["Timestamp", "Filename", "Prediction", "Confidence"]):
                 return pd.DataFrame(columns=["Timestamp", "Filename", "Prediction", "Confidence"])
             return df
@@ -74,12 +73,16 @@ with col1:
         image = Image.open(uploaded_file).convert("RGB")
         st.image(image, caption=f"Uploaded: {uploaded_file.name}", use_container_width=True)
         
-        # Prediction with spinners
+        # Prediction with spinners - CORRECT ONNX CALLS
         with st.spinner('🔍 Preprocessing image...'):
             time.sleep(0.5)
         
         with st.spinner('🎯 Predicting waste category...'):
-            pred, pred_idx, probs, conf = predict_image(image)
+            # CORRECT ONNX WORKFLOW
+            img_array = onnx_infer.preprocess_image(image)
+            prediction, confidence = onnx_infer.predict_onnx(img_array)
+            pred = prediction
+            conf = confidence
             time.sleep(0.8)
 
         # Results
@@ -116,7 +119,7 @@ with col1:
             "Confidence": round(float(conf), 4)
         }
         new_df = pd.concat([history_df, pd.DataFrame([new_row])], ignore_index=True)
-        new_df.tail(100).to_csv('prediction_history.csv', index=False)  # Keep last 100
+        new_df.tail(100).to_csv('prediction_history.csv', index=False)
 
 with col2:
     st.markdown("---")
@@ -128,7 +131,6 @@ with col2:
     
     history_df = load_history()
     if not history_df.empty:
-        # Style the dataframe
         st.markdown("""
         <style>
         .dataframe th { background-color: #4CAF50; color: white; }
@@ -148,14 +150,13 @@ with col2:
         )
         
         # Stats
-        if len(history_df) > 0:
-            st.markdown("---")
-            col_stats1, col_stats2 = st.columns(2)
-            with col_stats1:
-                st.metric("Total Predictions", len(history_df))
-            with col_stats2:
-                avg_conf = history_df["Confidence"].mean()
-                st.metric("Avg Confidence", f"{avg_conf:.1f}%")
+        st.markdown("---")
+        col_stats1, col_stats2 = st.columns(2)
+        with col_stats1:
+            st.metric("Total Predictions", len(history_df))
+        with col_stats2:
+            avg_conf = history_df["Confidence"].mean()
+            st.metric("Avg Confidence", f"{avg_conf:.1f}%")
     else:
         st.info("👆 Upload an image to see history populate!")
 
